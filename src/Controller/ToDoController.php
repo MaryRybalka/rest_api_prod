@@ -153,7 +153,7 @@ class ToDoController extends AbstractController
 
                 $data = [
                     'status' => 200,
-                    'errors' => "ToDo updated successfully",
+                    'errors' => "ToDo was updated successfully",
                 ];
                 return $this->response($data);
             }
@@ -168,15 +168,43 @@ class ToDoController extends AbstractController
     /**
      * @Route("todo/{id}", name="todo_delete", methods={"DELETE"})
      */
-    public function delete(Request $request, ToDo $toDo): Response
+    public function delete(Request $request, ToDoRepository $todoRepository, $id, UserRepository $userRepository): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $toDo->getId(), $request->request->get('_token'))) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($toDo);
-            $entityManager->flush();
-        }
+        $decode = json_decode($request->getContent(), true);
+        $data = [];
+        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        if ($founded) {
+            if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
+                return $this->json([
+                    'status' => 405,
+                    'message' => "Wrong password",
+                ]);
+            } else {
+                $entityManager = $this->getDoctrine()->getManager();
+                $todo = $todoRepository->find($id);
 
-        return $this->redirectToRoute('todo_index', [], Response::HTTP_SEE_OTHER);
+                if (!$todo) {
+                    $data = [
+                        'status' => 407,
+                        'errors' => "Todo not found",
+                    ];
+                    return $this->response($data, 407);
+                }
+                $entityManager->remove($todo);
+                $entityManager->flush();
+
+                $data = [
+                    'status' => 200,
+                    'errors' => "ToDo was deleted successfully",
+                ];
+                return $this->response($data);
+            }
+        } else {
+            return $this->json([
+                'status' => 402,
+                'message' => "User not exist",
+            ]);
+        }
     }
 
     /**
