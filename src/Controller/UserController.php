@@ -54,7 +54,7 @@ class UserController extends AbstractController
             if (!$founded) {
                 $user = new User();
                 $user->setEmail($email);
-                $user->setPassword($password);
+                $user->setPassword($this->hashPassword($password));
                 $entityManager->persist($user);
                 $entityManager->flush();
             } else {

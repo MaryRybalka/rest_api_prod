@@ -26,7 +26,7 @@ class User
     private $email;
 
     /**
-     * @ORM\Column(type="string", length=20)
+     * @ORM\Column(type="string", length=200)
      */
     private $password;
 
