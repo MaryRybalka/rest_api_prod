@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ToDo index{% endblock %}
+
+{% block body %}
+    <h1>ToDo index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>CreateDate</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for to_do in to_dos %}
+            <tr>
+                <td>{{ to_do.id }}</td>
+                <td>{{ to_do.title }}</td>
+                <td>{{ to_do.description }}</td>
+                <td>{{ to_do.createDate ? to_do.createDate|date('Y-m-d') : '' }}</td>
+                <td>
+                    <a href="{{ path('to_do_show', {'id': to_do.id}) }}">show</a>
+                    <a href="{{ path('to_do_edit', {'id': to_do.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('to_do_new') }}">Create new</a>
+{% endblock %}
