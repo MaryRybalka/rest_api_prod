@@ -110,8 +110,7 @@ class ToDo
     {
         return [
             "title" => $this->getTitle(),
-            "description" => $this->getDescription(),
-            "author" => $this->getDescription()
+            "description" => $this->getDescription()
         ];
     }
 }

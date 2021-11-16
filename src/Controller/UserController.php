@@ -13,11 +13,12 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Firebase\JWT\JWT;
 
 /**
  * Class UserController
  * @package App\Controller
- * @Route("/api")
+ * @Route("/")
  */
 class UserController extends AbstractController
 {
@@ -25,7 +26,7 @@ class UserController extends AbstractController
      * @param Request $request
      * @param UserRepository $userRepository
      * @return JsonResponse
-     * @Route("/user", name="user_create", methods={"POST"})
+     * @Route("user", name="user_create", methods={"POST"})
      */
     public function create(Request $request, UserRepository $userRepository): Response
     {
@@ -57,6 +58,7 @@ class UserController extends AbstractController
                 $user->setPassword($this->hashPassword($password));
                 $entityManager->persist($user);
                 $entityManager->flush();
+
             } else {
                 return $this->json([
                     'status' => 402,
@@ -66,7 +68,7 @@ class UserController extends AbstractController
 
             $data = [
                 'status' => 200,
-                'success' => "Post added successfully",
+                'success' => "User added successfully ",
             ];
             return $this->response($data);
 
@@ -74,6 +76,7 @@ class UserController extends AbstractController
             return $this->json([
                 'status' => 403,
                 'errors' => "Data no valid",
+                'm' => $e->getMessage(),
             ]);
         }
     }
