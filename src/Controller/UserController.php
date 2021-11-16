@@ -45,7 +45,7 @@ class UserController extends AbstractController
             if (!isset($email) || !isset($password)) {
                 return $this->json([
                     'status' => 401,
-                    'message' => "You should provide both login and password $email $password"
+                    'message' => "You should provide both login and password"
                 ]);
             }
 
@@ -99,7 +99,7 @@ class UserController extends AbstractController
         return $request;
     }
 
-    public function hashPassword($password)
+    static function hashPassword($password)
     {
         return hash("sha256", $password);
     }

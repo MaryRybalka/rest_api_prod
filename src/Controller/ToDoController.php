@@ -22,6 +22,8 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ToDoController extends AbstractController
 {
+    private $author;
+
     /**
      * @param Request $request
      * @param ToDoRepository $todoRepository
@@ -33,18 +35,25 @@ class ToDoController extends AbstractController
     {
 //        $jwtauth = $this->login($request, $userRepository);
 //        $decode = json_decode($jwtauth->getContent(), true);
-        $decode = json_decode($request->getContent(), true);
         $data = [];
-        $founded = $userRepository->findOneBy(array('email' =>  $decode['email']));
+//        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+
+        $decode = json_decode($request->getContent(), true);
+        $data=[];
+        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if ($founded) {
-//        if ($decode['token']) {
-            $authorId = json_decode( $founded->jsonSerialize()['id'], true);
-
-            $data = $todoRepository->findBy(array('author' => $authorId));
-            for($i=0;$i<count($data);$i++) $data[$i] = $data[$i]->jsonSerialize();
-
-            return $this->response((array)$data);
-        }else {
+            if ($founded->jsonSerialize()['password']!==UserController::hashPassword($decode['password'])){
+                return $this->json([
+                    'status' => 405,
+                    'message' => "Wrong password",
+                ]);
+            }else{
+                $this->author = $founded->jsonSerialize()['id'];
+                $data = $todoRepository->findBy(array('author' => $this->author));
+                for ($i = 0; $i < count($data); $i++) $data[$i] = $data[$i]->jsonSerialize();
+                return $this->response($data);
+            }
+        } else {
             return $this->json([
                 'status' => 402,
                 'message' => "User not exist",
@@ -55,48 +64,54 @@ class ToDoController extends AbstractController
     /**
      * @param Request $request
      * @param ToDoRepository $todoRepository
+     * @param UserRepository $userRepository
      * @return JsonResponse
-     * @Route("todo", name="todo_new", methods={"POST"})
+     * @Route("todo", name="todo_add", methods={"POST"})
+     * @throws Exception
      */
-    public function new(Request $request, ToDoRepository $todoRepository): Response
+    public function new(Request $request, ToDoRepository $todoRepository, UserRepository $userRepository): Response
     {
-        try {
-            $decode = json_decode($request->getContent(), true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
+        $decode = json_decode($request->getContent(), true);
+        $data = [];
+        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        if ($founded) {
+            if ($founded->jsonSerialize()['password']!==UserController::hashPassword($decode['password'])){
                 return $this->json([
-                    'status' => 402,
-                    'message' => "Error during parsing json",
+                    'status' => 405,
+                    'message' => "Wrong password",
                 ]);
+            }else{
+                $this->author = $founded;
+                $description = $decode['description'];
+                $title = $decode['title'];
+
+                if (!isset($title) || !isset($description)) {
+                    return $this->json([
+                        'status' => 401,
+                        'message' => "You should provide title and description "
+                    ]);
+                }
+
+                $entityManager = $this->getDoctrine()->getManager();
+
+                $todo = new ToDo();
+                $todo->setTitle($title);
+                $todo->setDescription($description);
+                $todo->setAuthor($this->author);
+                $todo->setCreateDate( new \DateTime('now', new \DateTimeZone('Africa/Casablanca')));
+                $entityManager->persist($todo);
+                $entityManager->flush();
+
+                $data = [
+                    'status' => 200,
+                    'success' => "ToDo added successfully",
+                ];
+                return $this->response($data);
             }
-
-            $email = $decode['email'];
-            $password = $decode['password'];
-
-            if (!isset($email) || !isset($password)) {
-                return $this->json([
-                    'status' => 401,
-                    'message' => "You should provide both login and password $email $password"
-                ]);
-            }
-
-            $entityManager = $this->getDoctrine()->getManager();
-
-            $todo = new ToDo();
-            $todo->setEmail($email);
-            $todo->setPassword($this->hashPassword($password));
-            $entityManager->persist($todo);
-            $entityManager->flush();
-
-            $data = [
-                'status' => 200,
-                'success' => "ToDo added successfully",
-            ];
-            return $this->response($data);
-
-        } catch (Exception $e) {
+        } else {
             return $this->json([
-                'status' => 403,
-                'errors' => "Data no valid",
+                'status' => 402,
+                'message' => "User not exist",
             ]);
         }
     }
@@ -224,20 +239,32 @@ class ToDoController extends AbstractController
         }
     }
 
-        public
-        function getJWTToken($value)
-        {
-            $time = time();
-            $payload = [
-                'iat' => $time,
-                'nbf' => $time,
-                'exp' => $time + 7200,
-                'data' => [
-                    'email' => $value['email']
-                ]
-            ];
-            $key = env('JWT_SECRET_KEY');
-            $alg = 'HS256';
-            return JWT::encode($payload, $key, $alg);
+    public function getJWTToken($value)
+    {
+        $time = time();
+        $payload = [
+            'iat' => $time,
+            'nbf' => $time,
+            'exp' => $time + 7200,
+            'data' => [
+                'email' => $value['email']
+            ]
+        ];
+        $key = env('JWT_SECRET_KEY');
+        $alg = 'HS256';
+        return JWT::encode($payload, $key, $alg);
+    }
+
+    public function checkLogged(Request $request, UserRepository $userRepository) : Response{
+        $decode = json_decode($request->getContent(), true);
+        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        if (!$founded) {
+            return $this->json([
+                'status' => 402,
+                'message' => "User not exist",
+            ]);
+        } else {
+            return $founded->jsonSerialize();
         }
     }
+}

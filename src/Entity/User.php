@@ -111,8 +111,7 @@ class User
         return [
             "id" => $this->getid(),
             "email" => $this->getEmail(),
-            "password" => $this->getPassword(),
-            "todo_list" => [$this->getTodoList()]
+            "password" => $this->getPassword()
         ];
     }
 }
