@@ -39,15 +39,15 @@ class ToDoController extends AbstractController
 //        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
 
         $decode = json_decode($request->getContent(), true);
-        $data=[];
+        $data = [];
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if ($founded) {
-            if ($founded->jsonSerialize()['password']!==UserController::hashPassword($decode['password'])){
+            if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
                 return $this->json([
                     'status' => 405,
                     'message' => "Wrong password",
                 ]);
-            }else{
+            } else {
                 $this->author = $founded->jsonSerialize()['id'];
                 $data = $todoRepository->findBy(array('author' => $this->author));
                 for ($i = 0; $i < count($data); $i++) $data[$i] = $data[$i]->jsonSerialize();
@@ -75,12 +75,12 @@ class ToDoController extends AbstractController
         $data = [];
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if ($founded) {
-            if ($founded->jsonSerialize()['password']!==UserController::hashPassword($decode['password'])){
+            if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
                 return $this->json([
                     'status' => 405,
                     'message' => "Wrong password",
                 ]);
-            }else{
+            } else {
                 $this->author = $founded;
                 $description = $decode['description'];
                 $title = $decode['title'];
@@ -98,7 +98,7 @@ class ToDoController extends AbstractController
                 $todo->setTitle($title);
                 $todo->setDescription($description);
                 $todo->setAuthor($this->author);
-                $todo->setCreateDate( new \DateTime('now', new \DateTimeZone('Africa/Casablanca')));
+                $todo->setCreateDate(new \DateTime('now', new \DateTimeZone('Africa/Casablanca')));
                 $entityManager->persist($todo);
                 $entityManager->flush();
 
@@ -119,59 +119,50 @@ class ToDoController extends AbstractController
     /**
      * @Route("todo/{id}", name="todo_update", methods={"PUT"})
      */
-    public function edit(Request $request, ToDoRepository $todoRepository, $id): Response
+    public function edit(Request $request, ToDoRepository $todoRepository, $id, UserRepository $userRepository): Response
     {
-        $entityManager = $this->getDoctrine()->getManager();
-        try {
-            $todo = $todoRepository->find($id);
-
-            if (!$todo) {
-                $data = [
+        $decode = json_decode($request->getContent(), true);
+        $data = [];
+        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        if ($founded) {
+            if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
+                return $this->json([
                     'status' => 405,
-                    'errors' => "Post not found",
+                    'message' => "Wrong password",
+                ]);
+            } else {
+                $entityManager = $this->getDoctrine()->getManager();
+                $todo = $todoRepository->find($id);
+
+                if (!$todo) {
+                    $data = [
+                        'status' => 407,
+                        'errors' => "Todo not found",
+                    ];
+                    return $this->response($data, 407);
+                }
+                $title = "";
+                $description = "";
+                if (isset($decode['title'])) $title = $decode['title'];
+                if (isset($decode['description'])) $description = $decode['description'];
+
+                if ($title) $todo->setTitle($title);
+                if ($description) $todo->setDescription($description);
+                $todo->setCreateDate(new \DateTime('now', new \DateTimeZone('Africa/Casablanca')));
+                $entityManager->flush();
+
+                $data = [
+                    'status' => 200,
+                    'errors' => "ToDo updated successfully",
                 ];
-                return $this->response($data, 404);
+                return $this->response($data);
             }
-
-            $request = $this->transformJsonBody($request);
-
-            if (!$request || !$request->get('title') || !$request->request->get('author')) {
-                throw new \Exception();
-            }
-
-            $todo->setTitle($request->get('title'));
-            $todo->setDescription($request->get('description'));
-            $todo->setAuthor($request->get('author'));
-            $todo->setCreateDate(\DateTimeInterface::COOKIE);
-            $entityManager->flush();
-
-            $data = [
-                'status' => 200,
-                'errors' => "Post updated successfully",
-            ];
-            return $this->response($data);
-
-        } catch (\Exception $e) {
-            $data = [
-                'status' => 422,
-                'errors' => "Data no valid",
-            ];
-            return $this->response($data, 422);
+        } else {
+            return $this->json([
+                'status' => 402,
+                'message' => "User not exist",
+            ]);
         }
-
-//        $form = $this->createForm(ToDoType::class, $toDo);
-//        $form->handleRequest($request);
-//
-//        if ($form->isSubmitted() && $form->isValid()) {
-//            $this->getDoctrine()->getManager()->flush();
-//
-//            return $this->redirectToRoute('to_do_index', [], Response::HTTP_SEE_OTHER);
-//        }
-//
-//        return $this->renderForm('to_do/edit.html.twig', [
-//            'to_do' => $toDo,
-//            'form' => $form,
-//        ]);
     }
 
     /**
@@ -255,7 +246,8 @@ class ToDoController extends AbstractController
         return JWT::encode($payload, $key, $alg);
     }
 
-    public function checkLogged(Request $request, UserRepository $userRepository) : Response{
+    public function checkLogged(Request $request, UserRepository $userRepository): Response
+    {
         $decode = json_decode($request->getContent(), true);
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if (!$founded) {
