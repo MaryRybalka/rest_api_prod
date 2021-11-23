@@ -26,6 +26,37 @@ class UserController extends AbstractController
      * @param Request $request
      * @param UserRepository $userRepository
      * @return JsonResponse
+     * @Route("user", name="user_index", methods={"GET"})
+     */
+    public function index(Request $request, UserRepository $userRepository): Response
+    {
+        $decode = json_decode($request->getContent(), true);
+        $data = [];
+        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        if ($founded) {
+            if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
+                return $this->json([
+                    'status' => "405",
+                    'message' => "Wrong password",
+                ]);
+            } else {
+                return $this->json([
+                    'status' => "200",
+                    'message' => "Exist",
+                ]);
+            }
+        } else {
+            return $this->json([
+                'status' => "402",
+                'message' => "User not exist",
+            ]);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @return JsonResponse
      * @Route("user", name="user_create", methods={"POST"})
      */
     public function create(Request $request, UserRepository $userRepository): Response
@@ -34,7 +65,7 @@ class UserController extends AbstractController
             $decode = json_decode($request->getContent(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return $this->json([
-                    'status' => 400,
+                    'status' => "400",
                     'message' => "Error during parsing json",
                 ]);
             }
@@ -44,7 +75,7 @@ class UserController extends AbstractController
 
             if (!isset($email) || !isset($password)) {
                 return $this->json([
-                    'status' => 401,
+                    'status' => "401",
                     'message' => "You should provide both login and password"
                 ]);
             }
@@ -61,20 +92,20 @@ class UserController extends AbstractController
 
             } else {
                 return $this->json([
-                    'status' => 402,
-                    'message' => "User with such login already registered",
+                    "status" => "402",
+                    "message" => 'User with such login already registered',
                 ]);
             }
 
             $data = [
-                'status' => 200,
+                'status' => "200",
                 'success' => "User added successfully ",
             ];
             return $this->response($data);
 
         } catch (Exception $e) {
             return $this->json([
-                'status' => 403,
+                'status' => "403",
                 'errors' => "Data no valid",
                 'm' => $e->getMessage(),
             ]);
@@ -91,7 +122,7 @@ class UserController extends AbstractController
         $data = json_decode($request->getContent(), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             return $this->json([
-                'status' => 400,
+                'status' => "400",
                 'message' => "Error during parsing json",
             ]);
         }
