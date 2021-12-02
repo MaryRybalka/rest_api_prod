@@ -2,18 +2,18 @@
 
 namespace App\Controller;
 
-use App\Entity\ToDo;
-use App\Entity\User;
-use App\Repository\UserRepository;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Entity\User;
+use App\Entity\ToDo;
+use Firebase\JWT\JWT;
+use App\Repository\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Firebase\JWT\JWT;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * Class UserController
@@ -35,21 +35,21 @@ class UserController extends AbstractController
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
-                return $this->json([
+                return $this->response([
                     'status' => "405",
                     'message' => "Wrong password",
                 ]);
             } else {
-                return $this->json([
+                return $this->response([
                     'status' => "200",
                     'message' => "Exist",
                 ]);
             }
         } else {
-            return $this->json([
+            return $this->response([
                 'status' => "402",
                 'message' => "User not exist",
-            ]);
+            ], "402");
         }
     }
 
@@ -64,20 +64,20 @@ class UserController extends AbstractController
         try {
             $decode = json_decode($request->getContent(), true);
             if (json_last_error() !== JSON_ERROR_NONE) {
-                return $this->json([
+                return $this->response([
                     'status' => "400",
                     'message' => "Error during parsing json",
-                ]);
+                ], "400");
             }
 
             $email = $decode['email'];
             $password = $decode['password'];
 
             if (!isset($email) || !isset($password)) {
-                return $this->json([
+                return $this->response([
                     'status' => "401",
                     'message' => "You should provide both login and password"
-                ]);
+                ], "401");
             }
 
             $entityManager = $this->getDoctrine()->getManager();
@@ -91,10 +91,10 @@ class UserController extends AbstractController
                 $entityManager->flush();
 
             } else {
-                return $this->json([
+                return $this->response([
                     "status" => "402",
                     "message" => 'User with such login already registered',
-                ]);
+                ], "402");
             }
 
             $data = [
@@ -104,11 +104,11 @@ class UserController extends AbstractController
             return $this->response($data);
 
         } catch (Exception $e) {
-            return $this->json([
+            return $this->response([
                 'status' => "403",
                 'errors' => "Data no valid",
                 'm' => $e->getMessage(),
-            ]);
+            ], "403");
         }
     }
 
@@ -121,10 +121,10 @@ class UserController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return $this->json([
+            return $this->response([
                 'status' => "400",
                 'message' => "Error during parsing json",
-            ]);
+            ], "400");
         }
         $request->request->replace($data);
         return $request;

@@ -2,18 +2,17 @@
 
 namespace App\Controller;
 
+use Exception;
 use App\Entity\ToDo;
-use App\Form\ToDoType;
+use Firebase\JWT\JWT;
 use App\Repository\ToDoRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Firebase\JWT\JWT;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * Class ToDoController
@@ -43,10 +42,10 @@ class ToDoController extends AbstractController
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
-                return $this->json([
+                return $this->response([
                     'status' => "405",
                     'message' => "Wrong password",
-                ]);
+                ], "405");
             } else {
                 $this->author = $founded->jsonSerialize()['id'];
                 $data = $todoRepository->findBy(array('author' => $this->author));
@@ -54,10 +53,10 @@ class ToDoController extends AbstractController
                 return $this->response($data);
             }
         } else {
-            return $this->json([
+            return $this->response([
                 'status' => "402",
                 'message' => "User not exist",
-            ]);
+            ], "402");
         }
     }
 
@@ -76,20 +75,20 @@ class ToDoController extends AbstractController
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
-                return $this->json([
+                return $this->response([
                     'status' => "405",
                     'message' => "Wrong password",
-                ]);
+                ], "405");
             } else {
                 $this->author = $founded;
                 $description = $decode['description'];
                 $title = $decode['title'];
 
                 if (!isset($title) || !isset($description)) {
-                    return $this->json([
+                    return $this->response([
                         'status' => "401",
                         'message' => "You should provide title and description "
-                    ]);
+                    ], "401");
                 }
 
                 $entityManager = $this->getDoctrine()->getManager();
@@ -109,10 +108,10 @@ class ToDoController extends AbstractController
                 return $this->response($data);
             }
         } else {
-            return $this->json([
+            return $this->response([
                 'status' => "402",
                 'message' => "User not exist",
-            ]);
+            ], "402");
         }
     }
 
@@ -126,19 +125,19 @@ class ToDoController extends AbstractController
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
-                return $this->json([
+                return $this->response([
                     'status' => "405",
                     'message' => "Wrong password",
-                ]);
+                ], "405");
             } else {
                 $entityManager = $this->getDoctrine()->getManager();
                 $todo = $todoRepository->find($id);
 
                 if (!$todo) {
-                    return $this->json([
+                    return $this->response([
                         'status' => "407",
                         'errors' => "Todo not found",
-                    ]);
+                    ], "407");
                 }
                 $title = "";
                 $description = "";
@@ -157,10 +156,10 @@ class ToDoController extends AbstractController
                 return $this->response($data);
             }
         } else {
-            return $this->json([
+            return $this->response([
                 'status' => "402",
                 'message' => "User not exist",
-            ]);
+            ], "402");
         }
     }
 
@@ -174,10 +173,10 @@ class ToDoController extends AbstractController
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
-                return $this->json([
+                return $this->response([
                     'status' => "405",
                     'message' => "Wrong password",
-                ]);
+                ], "405");
             } else {
                 $entityManager = $this->getDoctrine()->getManager();
                 $todo = $todoRepository->find($id);
@@ -187,7 +186,7 @@ class ToDoController extends AbstractController
                         'status' => "407",
                         'errors' => "Todo not found",
                     ];
-                    return $this->response($data, 407);
+                    return $this->response($data, "407");
                 }
                 $entityManager->remove($todo);
                 $entityManager->flush();
@@ -199,10 +198,10 @@ class ToDoController extends AbstractController
                 return $this->response($data);
             }
         } else {
-            return $this->json([
+            return $this->response([
                 'status' => "402",
                 'message' => "User not exist",
-            ]);
+            ],"402");
         }
     }
 
@@ -239,7 +238,7 @@ class ToDoController extends AbstractController
             $password = $request->get('password', '');
             $user = $userRepository->findOneBy(['email' => $user_name, 'password' => $password]);
             if (!$user) {
-                return $this->json([
+                return $this->response([
                     'status' => "400",
                     'message' => "Incorrect email or password",
                 ]);
@@ -248,12 +247,12 @@ class ToDoController extends AbstractController
             // логин успешной авторизации
             $token = $this->getJWTToken($user);
             cache('user-' . $user['email'], $user);
-            return $this->json(['token' => $token]);
+            return $this->response(['token' => $token]);
         } catch (Exception $e) {
-            return $this->json([
+            return $this->response([
                 'status' => "403",
                 'errors' => $e->getMessage(),
-            ]);
+            ], "403");
         }
     }
 
@@ -278,10 +277,10 @@ class ToDoController extends AbstractController
         $decode = json_decode($request->getContent(), true);
         $founded = $userRepository->findOneBy(array('email' => $decode['email']));
         if (!$founded) {
-            return $this->json([
+            return $this->response([
                 'status' => "402",
                 'message' => "User not exist",
-            ]);
+            ], "402");
         } else {
             return $founded->jsonSerialize();
         }

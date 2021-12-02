@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
-use App\Repository\ToDoRepository;
-use Doctrine\ORM\Mapping as ORM;
 use Exception;
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ToDoRepository;
 
 /**
  * @ORM\Entity(repositoryClass=ToDoRepository::class)
