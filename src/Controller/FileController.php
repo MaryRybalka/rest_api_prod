@@ -2,57 +2,76 @@
 
 namespace App\Controller;
 
-use Exception;
 use App\Entity\File;
-use Firebase\JWT\JWT;
-use App\Service\FileUploader;
 use App\Repository\FileRepository;
+use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Firebase\JWT\JWT;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * Class FileController
- * @package App\Controller
+ * @category PHP
+ * @package  App\Controller
+ * @author   mashka krasnova <mashka@example.com>
+ * @license  https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt /
+ * somename
+ * BSD Licence
+ * @link     https://github.com/MaryRybalka/restClient
+ *
  * @Route("/")
  */
 class FileController extends AbstractController
 {
     /**
      * @param FileRepository $fileRepository
-     * @return JsonResponse
+     *
+     * @return Response
+     *
+     * @returnc JsonResponse
+     *
      * @Route("files/", name="file_index", methods={"GET"})
      */
     public function index(FileRepository $fileRepository): Response
     {
         $data = $fileRepository->findAll();
-        if (count($data)>0) {
-            for ($i = 0; $i < count($data); $i++) $data[$i] = $data[$i]->jsonSerialize();
+        if (count($data) > 0) {
+            for ($i = 0; $i < count($data); $i++) {
+                $data[$i] =
+                    $data[$i]->jsonSerialize();
+            }
             return $this->response($data);
-        } else {
-            return $this->response([
-                'status' => "201",
-                'message' => "No Files",
-            ], "201");
         }
+        return $this->response([
+            'status' => "201",
+            'message' => "No Files",
+        ], "201");
     }
 
     /**
+     * lsllss
+     *
      * @param Request $request
      * @param FileRepository $fileRepository
      * @param FileUploader $fileUploader
-     * @param $name
+     * @param           $name
      * @return JsonResponse
      * @Route("files/{name}", name="file_add", methods={"POST"})
      */
-    public function new(Request $request, FileRepository $fileRepository, FileUploader $fileUploader, $name): Response
-    {
+    public function new(
+        Request        $request,
+        FileRepository $fileRepository,
+        FileUploader   $fileUploader,
+        $name
+    ): Response {
         $fileData = $request->files->get('file');
 //        $decode = json_decode($request->getContent(), true);
 //        $fileData = $decode['file'];
@@ -88,7 +107,10 @@ class FileController extends AbstractController
     }
 
     /**
+     * lalal
+     *
      * @param FileRepository $fileRepository
+     * @param           $id
      * @return BinaryFileResponse
      * @Route("files/{id}", name="file_by_id", methods={"GET"})
      */
@@ -97,55 +119,59 @@ class FileController extends AbstractController
         $data = $fileRepository->find($id);
         if ($data) {
             return $this->binaryResponse($data->getMime());
-        } else {
-            return $this->response([
-                'status' => "401",
-                'message' => "No File with that id: " . $id,
-            ], "401");
         }
+        return $this->response([
+            'status' => "401",
+            'message' => "No File with that id: " . $id,
+        ], "401");
     }
 
     /**
+     * lalala
+     *
      * @param Request $request
      * @param FileRepository $fileRepository
+     * @param $id
      * @return JsonResponse
      * @Route("files/{id}", name="file_delete", methods={"DELETE"})
      */
-    public function delete(Request $request, FileRepository $fileRepository, $id): Response
-    {
+    public function delete(
+        Request        $request,
+        FileRepository $fileRepository,
+        $id
+    ): Response {
         $file = $fileRepository->find($id);
         if (!$file) {
             return $this->response([
                 'status' => "401",
                 'message' => "No File with that id: " . $id,
             ]);
-        } else {
-            $filesystem = new Filesystem();
-            try {
-                $filesystem->remove([$file->getMime()]);
-            } catch (IOExceptionInterface $exception) {
-                return $this->response([
-                    'status' => "405",
-                    'message' => "Can't delete from directory",
-                ], "405");
-            }
-
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($file);
-            $entityManager->flush();
-
-            return $this->response([
-                'status' => "200",
-                'message' => "File was deleted successfully",
-            ], "200");
         }
+        $filesystem = new Filesystem();
+        try {
+            $filesystem->remove([$file->getMime()]);
+        } catch (IOExceptionInterface $exception) {
+            return $this->response([
+                'status' => "405",
+                'message' => "Can't delete from directory",
+            ], "405");
+        }
+
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->remove($file);
+        $entityManager->flush();
+
+        return $this->response([
+            'status' => "200",
+            'message' => "File was deleted successfully",
+        ], "200");
     }
 
     /**
      * Returns a JSON response
      *
      * @param array $data
-     * @param $status
+     * @param           $status
      * @param array $headers
      * @return JsonResponse
      */

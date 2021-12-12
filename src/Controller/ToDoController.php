@@ -2,17 +2,17 @@
 
 namespace App\Controller;
 
-use Exception;
 use App\Entity\ToDo;
-use Firebase\JWT\JWT;
 use App\Repository\ToDoRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Firebase\JWT\JWT;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * Class ToDoController
@@ -39,7 +39,7 @@ class ToDoController extends AbstractController
 
         $decode = json_decode($request->getContent(), true);
         $data = [];
-        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        $founded = $userRepository->findOneBy(['email' => $decode['email']]);
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
                 return $this->response([
@@ -48,8 +48,10 @@ class ToDoController extends AbstractController
                 ], "405");
             } else {
                 $this->author = $founded->jsonSerialize()['id'];
-                $data = $todoRepository->findBy(array('author' => $this->author));
-                for ($i = 0; $i < count($data); $i++) $data[$i] = $data[$i]->jsonSerialize();
+                $data = $todoRepository->findBy(['author' => $this->author]);
+                for ($i = 0; $i < count($data); $i++) {
+                    $data[$i] = $data[$i]->jsonSerialize();
+                }
                 return $this->response($data);
             }
         } else {
@@ -72,7 +74,7 @@ class ToDoController extends AbstractController
     {
         $decode = json_decode($request->getContent(), true);
         $data = [];
-        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        $founded = $userRepository->findOneBy(['email' => $decode['email']]);
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
                 return $this->response([
@@ -122,7 +124,7 @@ class ToDoController extends AbstractController
     {
         $decode = json_decode($request->getContent(), true);
         $data = [];
-        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        $founded = $userRepository->findOneBy(['email' => $decode['email']]);
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
                 return $this->response([
@@ -141,11 +143,19 @@ class ToDoController extends AbstractController
                 }
                 $title = "";
                 $description = "";
-                if (isset($decode['title'])) $title = $decode['title'];
-                if (isset($decode['description'])) $description = $decode['description'];
+                if (isset($decode['title'])) {
+                    $title = $decode['title'];
+                }
+                if (isset($decode['description'])) {
+                    $description = $decode['description'];
+                }
 
-                if ($title) $todo->setTitle($title);
-                if ($description) $todo->setDescription($description);
+                if ($title) {
+                    $todo->setTitle($title);
+                }
+                if ($description) {
+                    $todo->setDescription($description);
+                }
                 $todo->setCreateDate(new \DateTime('now', new \DateTimeZone('Africa/Casablanca')));
                 $entityManager->flush();
 
@@ -170,7 +180,7 @@ class ToDoController extends AbstractController
     {
         $decode = json_decode($request->getContent(), true);
         $data = [];
-        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        $founded = $userRepository->findOneBy(['email' => $decode['email']]);
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
                 return $this->response([
@@ -201,7 +211,7 @@ class ToDoController extends AbstractController
             return $this->response([
                 'status' => "402",
                 'message' => "User not exist",
-            ],"402");
+            ], "402");
         }
     }
 
@@ -231,51 +241,10 @@ class ToDoController extends AbstractController
         return $request;
     }
 
-    public function login(Request $request, UserRepository $userRepository)
-    {
-        try {
-            $user_name = $request->get('email', '');
-            $password = $request->get('password', '');
-            $user = $userRepository->findOneBy(['email' => $user_name, 'password' => $password]);
-            if (!$user) {
-                return $this->response([
-                    'status' => "400",
-                    'message' => "Incorrect email or password",
-                ]);
-            }
-            unset($user['password']);
-            // логин успешной авторизации
-            $token = $this->getJWTToken($user);
-            cache('user-' . $user['email'], $user);
-            return $this->response(['token' => $token]);
-        } catch (Exception $e) {
-            return $this->response([
-                'status' => "403",
-                'errors' => $e->getMessage(),
-            ], "403");
-        }
-    }
-
-    public function getJWTToken($value)
-    {
-        $time = time();
-        $payload = [
-            'iat' => $time,
-            'nbf' => $time,
-            'exp' => $time + 7200,
-            'data' => [
-                'email' => $value['email']
-            ]
-        ];
-        $key = env('JWT_SECRET_KEY');
-        $alg = 'HS256';
-        return JWT::encode($payload, $key, $alg);
-    }
-
     public function checkLogged(Request $request, UserRepository $userRepository): Response
     {
         $decode = json_decode($request->getContent(), true);
-        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        $founded = $userRepository->findOneBy(['email' => $decode['email']]);
         if (!$founded) {
             return $this->response([
                 'status' => "402",

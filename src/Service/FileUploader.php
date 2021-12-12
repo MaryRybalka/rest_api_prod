@@ -1,4 +1,5 @@
 <?php
+
 //подсмотрела у Миши и Лёши
 
 namespace App\Service;
@@ -26,7 +27,7 @@ class FileUploader
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
-        $fileName = $safeFilename.'-'.uniqid().'.'.$file->guessExtension();
+        $fileName = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
         try {
             $file->move($this->targetDirectory, $fileName);

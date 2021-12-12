@@ -2,18 +2,18 @@
 
 namespace App\Controller;
 
-use Exception;
-use App\Entity\User;
 use App\Entity\ToDo;
-use Firebase\JWT\JWT;
+use App\Entity\User;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Firebase\JWT\JWT;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 /**
  * Class UserController
@@ -32,7 +32,7 @@ class UserController extends AbstractController
     {
         $decode = json_decode($request->getContent(), true);
         $data = [];
-        $founded = $userRepository->findOneBy(array('email' => $decode['email']));
+        $founded = $userRepository->findOneBy(['email' => $decode['email']]);
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {
                 return $this->response([
@@ -82,14 +82,13 @@ class UserController extends AbstractController
 
             $entityManager = $this->getDoctrine()->getManager();
 
-            $founded = $userRepository->findOneBy(array('email' => $email));
+            $founded = $userRepository->findOneBy(['email' => $email]);
             if (!$founded) {
                 $user = new User();
                 $user->setEmail($email);
                 $user->setPassword($this->hashPassword($password));
                 $entityManager->persist($user);
                 $entityManager->flush();
-
             } else {
                 return $this->response([
                     "status" => "402",
@@ -102,7 +101,6 @@ class UserController extends AbstractController
                 'success' => "User added successfully ",
             ];
             return $this->response($data);
-
         } catch (Exception $e) {
             return $this->response([
                 'status' => "403",
@@ -130,9 +128,8 @@ class UserController extends AbstractController
         return $request;
     }
 
-    static function hashPassword($password)
+    public static function hashPassword($password)
     {
         return hash("sha256", $password);
     }
-
 }

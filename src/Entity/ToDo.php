@@ -2,9 +2,9 @@
 
 namespace App\Entity;
 
-use Exception;
-use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ToDoRepository;
+use Doctrine\ORM\Mapping as ORM;
+use Exception;
 
 /**
  * @ORM\Entity(repositoryClass=ToDoRepository::class)
@@ -95,7 +95,8 @@ class ToDo
      * @throws Exception
      * @ORM\PrePersist()
      */
-    public function beforeSave(){
+    public function beforeSave()
+    {
         $this->createDate = new \DateTime('now', new \DateTimeZone('Russia/Moscow'));
     }
 

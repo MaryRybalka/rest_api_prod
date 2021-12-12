@@ -1,95 +1,182 @@
 <?php
 
-namespace App\Entity;
-
-use Exception;
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
+/**
+ * @file
+ *
+ * Some descr for sniffer
+ *
+ * Some descr
+ *
+ * @category PHP
+ * @package  PHP_RestApi
+ * @author   mashka krasnova <mashka@example.com>
+ * @license  https://github.com/licence.txt BSD Licence
+ * @link     https://github.com/MaryRybalka/restClient
+ *
+ * @ORM\Entity(repositoryClass=UserRepository::class)
+ */
 
 /**
- * @ORM\Entity(repositoryClass=UserRepository::class)
+ * Extra comments
+ */
+
+namespace App\Entity;
+
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Exception;
+
+/**
+ * Template Class Doc Comment
+ *
+ * Template Class
+ *
+ * @category User
+ * @package  App\Entity
+ * @author   Author <author@domain.com>
+ * @license  https://opensource.org/licenses/MIT MIT License
+ * @link     https://github.com/MaryRybalka/restClient
  */
 class User
 {
     /**
+     * Just an id
+     *
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    private $_id;
 
     /**
+     * Just an email
+     *
      * @ORM\Column(type="string", length=100)
      */
-    private $email;
+    private $_email;
 
     /**
+     * Just a password
+     *
      * @ORM\Column(type="string", length=200)
      */
-    private $password;
+    private $_password;
 
     /**
-     * @ORM\OneToMany(targetEntity=ToDo::class, mappedBy="author", orphanRemoval=true)
+     * Just a todolist
+     *
+     * @ORM\OneToMany(targetEntity=ToDo::class, mappedBy="author",
+     *     orphanRemoval=true)
      */
-    private $todo_list;
+    private $_todo_list;
 
+    /**
+     * Just a constr
+     *
+     * @return void
+     */
     public function __construct()
     {
-        $this->todo_list = new ArrayCollection();
+        $this->_todo_list = new ArrayCollection();
     }
 
+    /**
+     * Just a get
+     *
+     * @return int
+     */
     public function getId(): ?int
     {
-        return $this->id;
+        return $this->_id;
     }
 
+    /**
+     * Just a getemail
+     *
+     * @return string
+     */
     public function getEmail(): ?string
     {
-        return $this->email;
+        return $this->_email;
     }
 
-    public function setEmail(string $email): self
+    /**
+     * Just a setemail
+     *
+     * @param string $_email bla-bla
+     *
+     * @return self
+     */
+    public function setEmail(string $_email): self
     {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
+        $this->_email = $_email;
 
         return $this;
     }
 
     /**
+     * Just a getpas
+     *
+     * @return string
+     */
+    public function getPassword(): ?string
+    {
+        return $this->_password;
+    }
+
+    /**
+     * Just a setpass
+     *
+     * @param string $_password bla-bla
+     *
+     * @return self
+     */
+    public function setPassword(string $_password): self
+    {
+        $this->_password = $_password;
+
+        return $this;
+    }
+
+    /**
+     * Just a getTodoList
+     *
      * @return Collection|ToDo[]
      */
     public function getTodoList(): Collection
     {
-        return $this->todo_list;
+        return $this->_todo_list;
     }
 
+    /**
+     * Just a getTodoList
+     *
+     * @param ToDo $todoList bla-bla
+     *
+     * @return self
+     */
     public function addTodoList(ToDo $todoList): self
     {
-        if (!$this->todo_list->contains($todoList)) {
-            $this->todo_list[] = $todoList;
+        if (!$this->_todo_list->contains($todoList)) {
+            $this->_todo_list[] = $todoList;
             $todoList->setAuthor($this);
         }
 
         return $this;
     }
 
+    /**
+     * Just a getTodoList
+     *
+     * @param ToDo $todoList bla-bla
+     *
+     * @return self
+     */
     public function removeTodoList(ToDo $todoList): self
     {
-        if ($this->todo_list->removeElement($todoList)) {
+        if ($this->_todo_list->removeElement($todoList)) {
             // set the owning side to null (unless already changed)
             if ($todoList->getAuthor() === $this) {
                 $todoList->setAuthor(null);
@@ -101,10 +188,11 @@ class User
 
     /**
      * Specify data which should be serialized to JSON
-     * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
+     *
+     * @link   https://php.net/manual/en/jsonserializable.jsonserialize.php
      * @return mixed data which can be serialized by <b>json_encode</b>,
      * which is a value of any type other than a resource.
-     * @since 5.4.0
+     * @since  5.4.0
      */
     public function jsonSerialize()
     {

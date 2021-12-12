@@ -76,9 +76,9 @@ class File
         ];
     }
 
-    public function getMime() : String
+    public function getMime(): String
     {
-        return $this->getType().'/'.$this->getSafeName();
+        return $this->getType() . '/' . $this->getSafeName();
     }
 
     public function getSafeName(): ?string
