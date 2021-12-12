@@ -28,6 +28,7 @@ php -S 127.0.0.1:8000 -r public
 <br />
 1. Картинки <br />
 <br />
+
 ![image](https://user-images.githubusercontent.com/40167168/144465085-314b163d-7a5b-4a2a-9ca8-9c970aa23119.png)
 
 2.Текстового <br />
