@@ -54,6 +54,8 @@ class FileController extends AbstractController
     public function new(Request $request, FileRepository $fileRepository, FileUploader $fileUploader, $name): Response
     {
         $fileData = $request->files->get('file');
+//        $decode = json_decode($request->getContent(), true);
+//        $fileData = $decode['file'];
         if ($fileData) {
             try {
                 $sluggedFileName = $fileUploader->upload($fileData);
