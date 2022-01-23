@@ -19,13 +19,13 @@ fos_rest:
   exception:
     enabled: true
 
-fos_user:
-  db_driver: orm
-  firewall_name: api
-  user_class: App\Entity\User
-  from_email:
-    address: rybalkamasha64@gmail.com
-    sender_name: masha
+#fos_user:
+#  db_driver: orm
+#  firewall_name: api
+#  user_class: App\Entity\User
+#  from_email:
+#    address: rybalkamasha64@gmail.com
+#    sender_name: masha
 
 jms_serializer:
   visitors:

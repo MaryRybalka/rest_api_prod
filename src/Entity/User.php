@@ -1,25 +1,5 @@
 <?php
 
-/**
- * @file
- *
- * Some descr for sniffer
- *
- * Some descr
- *
- * @category PHP
- * @package  PHP_RestApi
- * @author   mashka krasnova <mashka@example.com>
- * @license  https://github.com/licence.txt BSD Licence
- * @link     https://github.com/MaryRybalka/restClient
- *
- * @ORM\Entity(repositoryClass=UserRepository::class)
- */
-
-/**
- * Extra comments
- */
-
 namespace App\Entity;
 
 use App\Repository\UserRepository;
@@ -29,15 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Exception;
 
 /**
- * Template Class Doc Comment
- *
- * Template Class
- *
- * @category User
- * @package  App\Entity
- * @author   Author <author@domain.com>
- * @license  https://opensource.org/licenses/MIT MIT License
- * @link     https://github.com/MaryRybalka/restClient
+ * @ORM\Entity(repositoryClass=UserRepository::class)
  */
 class User
 {

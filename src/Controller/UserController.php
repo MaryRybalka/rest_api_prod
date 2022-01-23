@@ -8,7 +8,6 @@ use App\Repository\UserRepository;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use Firebase\JWT\JWT;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -70,8 +69,10 @@ class UserController extends AbstractController
                 ], "400");
             }
 
-            $email = $decode['email'];
+            echo "ok";
+
             $password = $decode['password'];
+            $email = $decode['email'];
 
             if (!isset($email) || !isset($password)) {
                 return $this->response([
