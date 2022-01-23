@@ -36,7 +36,7 @@ class FileController extends AbstractController
      *
      * @return Response
      *
-     * @returnc JsonResponse
+     * @return JsonResponse
      *
      * @Route("files/", name="file_index", methods={"GET"})
      */
