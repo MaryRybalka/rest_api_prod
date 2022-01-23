@@ -31,6 +31,7 @@ class UserController extends AbstractController
     {
         $decode = json_decode($request->getContent(), true);
         $data = [];
+//        dd($decode);
         $founded = $userRepository->findOneBy(['email' => $decode['email']]);
         if ($founded) {
             if ($founded->jsonSerialize()['password'] !== UserController::hashPassword($decode['password'])) {

@@ -20,21 +20,21 @@ class User
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $_id;
+    private $id;
 
     /**
      * Just an email
      *
      * @ORM\Column(type="string", length=100)
      */
-    private $_email;
+    private $email;
 
     /**
      * Just a password
      *
      * @ORM\Column(type="string", length=200)
      */
-    private $_password;
+    private $password;
 
     /**
      * Just a todolist
@@ -42,7 +42,7 @@ class User
      * @ORM\OneToMany(targetEntity=ToDo::class, mappedBy="author",
      *     orphanRemoval=true)
      */
-    private $_todo_list;
+    private $todo_list;
 
     /**
      * Just a constr
@@ -51,7 +51,7 @@ class User
      */
     public function __construct()
     {
-        $this->_todo_list = new ArrayCollection();
+        $this->todo_list = new ArrayCollection();
     }
 
     /**
@@ -61,7 +61,7 @@ class User
      */
     public function getId(): ?int
     {
-        return $this->_id;
+        return $this->id;
     }
 
     /**
@@ -71,7 +71,7 @@ class User
      */
     public function getEmail(): ?string
     {
-        return $this->_email;
+        return $this->email;
     }
 
     /**
@@ -83,7 +83,7 @@ class User
      */
     public function setEmail(string $_email): self
     {
-        $this->_email = $_email;
+        $this->email = $_email;
 
         return $this;
     }
@@ -95,7 +95,7 @@ class User
      */
     public function getPassword(): ?string
     {
-        return $this->_password;
+        return $this->password;
     }
 
     /**
@@ -107,7 +107,7 @@ class User
      */
     public function setPassword(string $_password): self
     {
-        $this->_password = $_password;
+        $this->password = $_password;
 
         return $this;
     }
@@ -119,7 +119,7 @@ class User
      */
     public function getTodoList(): Collection
     {
-        return $this->_todo_list;
+        return $this->todo_list;
     }
 
     /**
@@ -131,8 +131,8 @@ class User
      */
     public function addTodoList(ToDo $todoList): self
     {
-        if (!$this->_todo_list->contains($todoList)) {
-            $this->_todo_list[] = $todoList;
+        if (!$this->todo_list->contains($todoList)) {
+            $this->todo_list[] = $todoList;
             $todoList->setAuthor($this);
         }
 
@@ -148,7 +148,7 @@ class User
      */
     public function removeTodoList(ToDo $todoList): self
     {
-        if ($this->_todo_list->removeElement($todoList)) {
+        if ($this->todo_list->removeElement($todoList)) {
             // set the owning side to null (unless already changed)
             if ($todoList->getAuthor() === $this) {
                 $todoList->setAuthor(null);
